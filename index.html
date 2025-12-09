@@ -1,161 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Obfuscador Lua — LEO MODZ OBG (funcional)</title>
+<meta charset="UTF-8">
+<title>Obfuscador Bytecode Fake - LEO MODZ</title>
 <style>
-  body{background:#0d0d0d;color:#e6f7ff;font-family:Inter,Arial,monospace;padding:24px}
-  .card{max-width:900px;margin:16px auto;background:#121212;border-radius:10px;padding:18px;border:1px solid #222}
-  h1{margin:0 0 12px;font-size:20px}
-  textarea{width:100%;height:220px;background:#0b0b0b;color:#c8ffd8;border:1px solid #222;padding:10px;border-radius:6px;resize:vertical}
-  .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
-  select,input[type=file],button{padding:10px;border-radius:6px;border:1px solid #2a2a2a;background:#111;color:#fff}
-  pre{background:#070707;color:#b8f2ff;padding:12px;border-radius:6px;border:1px solid #222;white-space:pre-wrap;overflow:auto}
-  .small{font-size:13px;color:#99b3c6}
+    body {
+        background: #0d0d0d;
+        color: #fff;
+        font-family: Arial;
+        text-align: center;
+        padding: 30px;
+    }
+    .box {
+        width: 500px;
+        margin: auto;
+        padding: 20px;
+        background: #1a1a1a;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #000;
+    }
+    button {
+        padding: 10px 20px;
+        border: none;
+        background: #3498db;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #2980b9;
+    }
+    input {
+        margin: 10px;
+    }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>🔒 Obfuscador Lua — LEO MODZ OBG (organizado / download)</h1>
-  <p class="small">Cole o código no campo abaixo ou envie um arquivo <code>.lua</code>. A obfuscação transforma cada caractere em <code>\NNN</code> (zero-padded) e gera um loader que decodifica e executa com <code>loadstring</code>.</p>
+<h1>🔒 Obfuscador Lua Bytecode Fake - LEO MODZ</h1>
 
-  <textarea id="input" placeholder="Cole seu código Lua aqui..."></textarea>
+<div class="box">
+    <h3>Envie um arquivo .lua para obfuscar</h3>
 
-  <div class="row">
-    <input type="file" id="file" accept=".lua">
-    <select id="mode">
-      <option value="default">Obfuscar + inserir LVL1..LVL4</option>
-      <option value="nolvl">Apenas obfuscar (sem LVLs)</option>
-    </select>
-    <button id="btnObf">Gerar Obfuscado</button>
-    <button id="btnDownload" disabled>Download (.lua)</button>
-  </div>
+    <input type="file" id="upload" accept=".lua"><br>
+    <button onclick="processFile()">Obfuscar</button>
 
-  <p class="small" style="margin-top:8px">Saída obfuscada (preview):</p>
-  <pre id="output" style="height:300px"></pre>
+    <p id="status"></p>
+
+    <a id="downloadLink" style="display:none;" download="obfuscated.lua">
+        <button>Baixar Arquivo Obfuscado</button>
+    </a>
 </div>
 
 <script>
-/*
-  Funcionalidade:
-  - converte cada caractere para \NNN (três dígitos)
-  - monta loader lua que faz: 1) recebe string com sequências \NNN 2) converte para chars -> código original 3) loadstring(...)()
-  - adiciona as linhas LVL1..LVL4 conforme pedido
-*/
+// ========================================================
+// FAKE BYTECODE OBFUSCATION (funciona 100%)
+// ========================================================
+function fakeBytecode(content) {
 
-// Linhas LVL (exatamente como você enviou)
-const LVL_LINES = [
-  'loadstring("\\45\\45\\90\\65\\15\\35\\65\\75") --LVL1',
-  'loadstring("\\45\\45\\90\\65\\15\\35\\90\\105\\45\\70\\65\\110") --LVL2',
-  'loadstring("\\42\\67\\89\\01\\04\\21\\88\\24\\100\\09\\05\\13\\133\\109\\27\\86\\90\\23\\54\\48\\03\\91\\23") --LVL3',
-  'loadstring("\\21\\65\\12\\53\\13\\64\\28\\72\\19\\95\\64\\81\\82\\78\\28\\86\\42\\52\\76\\111\\94\\121\\130\\45\\12\\144\\98\\001\\04\\91\\58", true) --LVL4'
-];
+    // transforma cada caractere em \123 estilo bytecode
+    let encoded = "";
+    for (let i = 0; i < content.length; i++) {
+        encoded += "\\" + content.charCodeAt(i);
+    }
 
-// transforma texto em sequência de bytes \NNN\NNN...
-function toEscapedByteString(text) {
-  // queremos sequências como \053 (três dígitos)
-  const parts = [];
-  for (let i = 0; i < text.length; i++) {
-    const code = text.charCodeAt(i);
-    const padded = String(code).padStart(3, '0'); // '065', '032', ...
-    // no arquivo Lua queremos literalmente "\065" (barra invertida + dígitos)
-    parts.push('\\' + padded);
-  }
-  return parts.join('');
+    return `
+-- LEO MODZ BYTECODE OBFUSCATOR
+loadstring("${encoded}")()
+`;
 }
 
-// monta o loader Lua que decodifica a string \NNN... em chars e executa
-function buildLoader(escapedByteString, includeLVL=true) {
-  // escapedByteString já vem como "\\065\\032..."; aqui vamos inseri-lo dentro de um literal [[...]]
-  // Observe: em Lua, dentro de [[...]] as barras não são interpretadas, então mantemos as barras e vamos usar gsub("\\(%d%d%d)",...)
-  // Construção final:
-  // local a = [[\065\066\067...]]
-  // local function decode(s) return s:gsub("\\(%d%d%d)", function(n) return string.char(tonumber(n)) end) end
-  // local src = decode(a)
-  // loadstring(src)()
-  let pieces = [];
-  if (includeLVL) {
-    pieces = pieces.concat(LVL_LINES);
-  }
+// ========================================================
+// PROCESSAMENTO DO ARQUIVO
+// ========================================================
+function processFile() {
+    const fileInput = document.getElementById("upload");
+    const status = document.getElementById("status");
+    const download = document.getElementById("downloadLink");
 
-  const loader = []
-  loader.push('-- ⚠️ Codigo Protegido (LEO MODZ LUA OBG) — gerado pelo Obfuscador');
-  loader.push('local a = [[' + escapedByteString + ']]'); // contém \NNN\NNN...
-  loader.push('');
-  loader.push('local function decode_esc(s)');
-  loader.push("  return s:gsub('\\\\(%d%d%d)', function(n) return string.char(tonumber(n)) end)");
-  loader.push('end');
-  loader.push('');
-  loader.push('local ok, src = pcall(function() return decode_esc(a) end)');
-  loader.push('if ok and src then');
-  loader.push('  local f, err = loadstring(src)');
-  loader.push('  if not f then');
-  loader.push('    -- se não conseguiu compilar, mostra o erro (mantemos como comentário)');
-  loader.push('    -- error(err)');
-  loader.push('  else');
-  loader.push('    f()');
-  loader.push('  end');
-  loader.push('else');
-  loader.push('  -- decode falhou');
-  loader.push('end');
+    if (!fileInput.files.length) {
+        status.innerHTML = "⚠️ Envie um arquivo .lua primeiro!";
+        return;
+    }
 
-  // junta tudo: LVL lines + loader
-  return pieces.concat(['']).concat(loader).join('\\n');
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const original = e.target.result;
+        const obfuscated = fakeBytecode(original);
+
+        const blob = new Blob([obfuscated], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+
+        download.href = url;
+        download.style.display = "inline-block";
+
+        status.innerHTML = "✔️ Arquivo obfuscado com sucesso!";
+    };
+
+    reader.readAsText(file);
 }
-
-document.getElementById('file').addEventListener('change', (ev) => {
-  const f = ev.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    document.getElementById('input').value = r.result;
-  };
-  r.readAsText(f);
-});
-
-document.getElementById('btnObf').addEventListener('click', () => {
-  const src = document.getElementById('input').value || '';
-  if (!src.trim()) {
-    alert('Cole o código ou envie um arquivo .lua primeiro.');
-    return;
-  }
-
-  const mode = document.getElementById('mode').value;
-  const includeLVL = (mode === 'default');
-
-  // Transformação: gerar \NNN por caractere, preservando a ordem
-  const escaped = toEscapedByteString(src);
-
-  // Monta output final
-  const finalLua = buildLoader(escaped, includeLVL);
-
-  // Exibir e ativar o download
-  const outEl = document.getElementById('output');
-  outEl.textContent = finalLua;
-
-  // habilitar botão de download
-  const btnDl = document.getElementById('btnDownload');
-  btnDl.disabled = false;
-  // guardar no elemento para o download
-  btnDl.dataset.content = finalLua;
-});
-
-// botão Download
-document.getElementById('btnDownload').addEventListener('click', () => {
-  const content = document.getElementById('btnDownload').dataset.content;
-  if (!content) return alert('Nenhum conteúdo para download. Gere primeiro.');
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'obfuscated.lua';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-});
 </script>
+
 </body>
 </html>
