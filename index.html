@@ -1,48 +1,26 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Obfuscador Bytecode Fake - LEO MODZ</title>
+<title>Obfuscador Lua - LEO MODZ</title>
 <style>
-    body {
-        background: #0d0d0d;
-        color: #fff;
-        font-family: Arial;
-        text-align: center;
-        padding: 30px;
-    }
-    .box {
-        width: 500px;
-        margin: auto;
-        padding: 20px;
-        background: #1a1a1a;
-        border-radius: 10px;
-        box-shadow: 0 0 10px #000;
-    }
-    button {
-        padding: 10px 20px;
-        border: none;
-        background: #3498db;
-        color: white;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #2980b9;
-    }
-    input {
-        margin: 10px;
-    }
+    body { background: #0f0f0f; color: #fff; font-family: Arial; text-align: center; padding: 30px; }
+    .box { width: 500px; margin: auto; padding: 20px; background: #1a1a1a;
+           border-radius: 10px; box-shadow: 0 0 10px #000; }
+    button { padding: 10px 20px; border: none; background: #3498db; color: white; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #2980b9; }
 </style>
 </head>
-<body>
 
-<h1>🔒 Obfuscador Lua Bytecode Fake - LEO MODZ</h1>
+<body>
+<h1>🔒 Obfuscador Lua - LEO MODZ</h1>
 
 <div class="box">
     <h3>Envie um arquivo .lua para obfuscar</h3>
 
-    <input type="file" id="upload" accept=".lua"><br>
+    <input type="file" id="upload" accept=".lua">
+    <br><br>
+
     <button onclick="processFile()">Obfuscar</button>
 
     <p id="status"></p>
@@ -53,50 +31,61 @@
 </div>
 
 <script>
-// ========================================================
-// FAKE BYTECODE OBFUSCATION (funciona 100%)
-// ========================================================
-function fakeBytecode(content) {
+function obfuscateLua(original) {
 
-    // transforma cada caractere em \123 estilo bytecode
-    let encoded = "";
-    for (let i = 0; i < content.length; i++) {
-        encoded += "\\" + content.charCodeAt(i);
+    function dumpBytes(s) {
+        let out = [];
+        for (let i = 0; i < s.length; i++) {
+            out.push(s.charCodeAt(i));
+        }
+        return out.join(",");
     }
 
+    const encoded = dumpBytes(original);
+
     return `
--- LEO MODZ BYTECODE OBFUSCATOR
-loadstring("${encoded}")()
+-- Obfuscado por LEO MODZ
+local b = {${encoded}}
+
+local s = ""
+for i = 1, #b do
+    s = s .. string.char(b[i])
+end
+
+local f = loadstring(s)
+if f then
+    local ok, err = pcall(f)
+    if not ok then
+        print("-- erro ao executar script obfuscado:\\n-- " .. tostring(err))
+    end
+else
+    print("-- erro ao decodificar bytecode")
+end
 `;
 }
 
-// ========================================================
-// PROCESSAMENTO DO ARQUIVO
-// ========================================================
 function processFile() {
-    const fileInput = document.getElementById("upload");
+    const file = document.getElementById("upload").files[0];
     const status = document.getElementById("status");
-    const download = document.getElementById("downloadLink");
+    const dLink = document.getElementById("downloadLink");
 
-    if (!fileInput.files.length) {
-        status.innerHTML = "⚠️ Envie um arquivo .lua primeiro!";
+    if (!file) {
+        status.innerHTML = "⚠️ Envie um arquivo .lua!";
         return;
     }
 
-    const file = fileInput.files[0];
     const reader = new FileReader();
 
     reader.onload = function(e) {
-        const original = e.target.result;
-        const obfuscated = fakeBytecode(original);
+        const content = e.target.result;
 
-        const blob = new Blob([obfuscated], { type: "text/plain" });
+        const obf = obfuscateLua(content);
+
+        const blob = new Blob([obf], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
-
-        download.href = url;
-        download.style.display = "inline-block";
-
-        status.innerHTML = "✔️ Arquivo obfuscado com sucesso!";
+        dLink.href = url;
+        dLink.style.display = "inline-block";
+        status.innerHTML = "✔️ Script obfuscado com sucesso!";
     };
 
     reader.readAsText(file);
