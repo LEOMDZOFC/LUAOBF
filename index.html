@@ -2,17 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Obfuscador Lua - LEO MODZ</title>
+<title>Obfuscador Lua</title>
 <style>
     body {
-        background: #0f0f0f;
+        background: #0d0d0d;
         color: #fff;
         font-family: Arial;
         text-align: center;
         padding: 30px;
     }
     .box {
-        width: 500px;
+        width: 520px;
         margin: auto;
         padding: 20px;
         background: #1a1a1a;
@@ -37,85 +37,70 @@
 </head>
 <body>
 
-<h1>🔒 Obfuscador Lua - LEO MODZ</h1>
+<h1>🔒 Obfuscador Lua</h1>
 
 <div class="box">
     <h3>Envie um arquivo .lua para obfuscar</h3>
 
     <input type="file" id="upload" accept=".lua"><br>
-    <button onclick="processFile()">Obfuscar</button>
+    <button onclick="processar()">Obfuscar</button>
 
-    <p id="status"></p>
-
-    <a id="downloadLink" style="display:none;" download="obfuscated.lua">
-        <button>Baixar Arquivo Obfuscado</button>
-    </a>
+    <pre id="saida" style="text-align:left; white-space:pre-wrap; margin-top:20px;"></pre>
+<button onclick="download()">DOWNLOAD</button>
 </div>
 
 <script>
-// ======================================================
-// 🔥 NOVO OBFUSCATE — versão baseada no código enviado
-// ======================================================
-function obfuscate(content) {
+// Os níveis fornecidos pelo usuário
+const OBF_LEVELS = {
+    1: 'loadstring("\45\45\90\65\15\35\65\75")',
+    2: 'loadstring("\45\45\90\65\15\35\90\105\45\70\65\110")',
+    3: 'loadstring("\42\67\89\01\04\21\88\24\100\09\05\13\133\109\27\86\90\23\54\48\03\91\23")',
+    4: 'loadstring("\21\65\12\53\13\64\28\72\19\95\64\81\82\78\28\86\42\52\76\111\94\121\130\45\12\144\98\001\04\91\58", true)'
+};
 
-    return `
--- LEO MODZ ADVANCED OBFUSCATOR
--- Níveis de segurança LVL1 → LVL4
+function processar() {
+    const file = document.getElementById('upload').files[0];
+    if (!file) return alert("Selecione um arquivo .lua");
 
-loadstring("\\45\\45\\90\\65\\15\\35\\65\\75")() -- LVL1
-loadstring("\\45\\45\\90\\65\\15\\35\\90\\105\\45\\70\\65\\110")() -- LVL2
-loadstring("\\42\\67\\89\\01\\04\\21\\88\\24\\100\\09\\05\\13\\133\\109\\27\\86\\90\\23\\54\\48\\03\\91\\23")() -- LVL3
-loadstring("\\21\\65\\12\\53\\13\\64\\28\\72\\19\\95\\64\\81\\82\\78\\28\\86\\42\\52\\76\\111\\94\\121\\130\\45\\12\\144\\98\\001\\04\\91\\58", true)() -- LVL4
-
-
--- BLOCO PRINCIPAL OBFUSCADO
-local __LEOMODZ__ = [==[
-${content}
-]==]
-
--- Execução final misturada
-loadstring(
-    "\\21\\65\\12\\53\\13\\64\\28\\72\\19\\95\\64\\81\\82\\78\\28\\86\\42\\52\\76\\111\\94\\121\\130\\45\\12\\144\\98\\001\\04\\91\\58" ..
-    "\\42\\67\\89\\01\\04\\21\\88\\24\\100\\09\\05\\13\\133\\109\\27\\86\\90\\23\\54\\48\\03\\91\\23",
-true
-)()
-
-print("SCRIPT OBFUSCADO POR LEO MODZ")
-`;
-}
-
-// =========================================
-// PROCESSAR ARQUIVO
-// =========================================
-function processFile() {
-    const fileInput = document.getElementById("upload");
-    const status = document.getElementById("status");
-    const download = document.getElementById("downloadLink");
-
-    if (!fileInput.files.length) {
-        status.innerHTML = "⚠️ Envie um arquivo .lua primeiro!";
-        return;
-    }
-
-    const file = fileInput.files[0];
     const reader = new FileReader();
 
-    reader.onload = function(e) {
-        const originalContent = e.target.result;
-        const obfuscated = obfuscate(originalContent);
+    reader.onload = function(evt) {
+        const script = evt.target.result;
 
-        const blob = new Blob([obfuscated], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
+        // Simples codificação fake só para demonstração (não é bytecode real)
+        const encoded = script
+            .split('')
+            .map(c => c.charCodeAt(0) + 3)
+            .join('-');
 
-        download.href = url;
-        download.style.display = "inline-block";
+        // Loader final baseado na estrutura exótica fornecida
+        const loader = `
+local a = [[${encoded}]]
+local function decode(str)
+    local out = {}
+    for num in string.gmatch(str, "(.-)%-") do
+        table.insert(out, string.char(tonumber(num)-3))
+    end
+    return table.concat(out)
+end
+${OBF_LEVELS[1]}
+${OBF_LEVELS[2]}
+${OBF_LEVELS[3]}
+${OBF_LEVELS[4]}
+loadstring(decode(a))()
+        `;
 
-        status.innerHTML = "✔️ Arquivo obfuscado com sucesso!";
+        document.getElementById("saida").textContent = loader;
     };
 
     reader.readAsText(file);
 }
-</script>
+function download(){
+    const content = document.getElementById('output').textContent;
+    const blob = new Blob([content], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'obf
 
 </body>
 </html>
