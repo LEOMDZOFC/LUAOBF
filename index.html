@@ -1,1 +1,99 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Obfuscador Lua Bytecode Real</title>
+
+<script src="https://unpkg.com/fengari-web/dist/fengari-web.js"></script>
+
+<style>
+    body {
+        background: #0a0a0a;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+        padding: 30px;
+    }
+    .box {
+        width: 500px;
+        margin: auto;
+        padding: 20px;
+        background: #1a1a1a;
+        border-radius: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h1>🔒 Obfuscador Lua – Bytecode REAL (Lua 5.1)</h1>
+
+<div class="box">
+    <input type="file" id="luaFile" accept=".lua"><br><br>
+    <button onclick="compileLua()">Obfuscar</button>
+
+    <p id="status"></p>
+
+    <a id="download" style="display:none;" download="obfuscated.lua">
+        <button>Baixar Obfuscado</button>
+    </a>
+</div>
+
+<script>
+
+function escapeByte(b) {
+    return "\\" + b.toString();
+}
+
+function compileLua() {
+    const input = document.getElementById("luaFile");
+    const status = document.getElementById("status");
+    const download = document.getElementById("download");
+
+    if (!input.files.length) {
+        status.innerHTML = "Envie um arquivo .lua!";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const code = e.target.result;
+
+        try {
+            // Compila o bytecode REAL usando Fengari
+            const bc = fengari.load(code);
+
+            // Fengari devolve a função compilada
+            const dump = fengari.lua.dump(bc);
+
+            let bytestr = "";
+            for (let i = 0; i < dump.length; i++) {
+                bytestr += escapeByte(dump[i]);
+            }
+
+            const finalScript = 
+`-- Lua Bytecode Obfuscation
+-- Compilado pelo Obfuscador LEO MODZ
+
+local f = loadstring("${bytestr}")
+return f()
+`;
+
+            const blob = new Blob([finalScript], { type: "text/plain" });
+            download.href = URL.createObjectURL(blob);
+            download.style.display = "inline-block";
+
+            status.innerHTML = "✔ Compilado com sucesso! Bytecode REAL!";
+
+        } catch(err) {
+            status.innerHTML = "Erro ao compilar: " + err;
+        }
+    };
+
+    reader.readAsText(input.files[0]);
+}
+
+</script>
+
+</body>
+</html>
