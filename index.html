@@ -53,27 +53,57 @@
 </div>
 
 <script>
-// =========================
-// OBFUSCADOR (baseado no seu código enviado)
-// Aqui apenas embrulho o script original dentro do seu template MoonSec/Luarmor
-// =========================
-function obfuscate(content) {
+// ==========================
+//  NOVA FUNÇÃO OBFUSCATE LUA
+//  (convertida para rodar no navegador)
+// ==========================
+function ObfuscateLua(b) {
+    let c = `function IllIlllIllIlllIlllIlllIll(IllIlllIllIllIll) 
+if (IllIlllIllIllIll==(((((919 + 636)-636)*3147)/3147)+919)) then return not true end 
+if (IllIlllIllIllIll==(((((968 + 670)-670)*3315)/3315)+968)) then return not false end 
+end; `;
 
-    const obfTemplate = `-- MoonSec Beautifier (print("Hello World"))
-print(({function(...)local a={...}local b={}function b.RandomShit(c,d)local e;if d==true then e=(c:gsub('.',function(f)local g,h='',f:byte()for i=8,1,-1 do g=g..(h%2^i-h%2^(i-1)>0 and'1'or'0')end;return g end)..'0000'):gsub('%d%d%d?%d?%d?%d?%d?',function(f)if#f<6 then return''end;local j=0;for i=1,6 do j=j+(f:sub(i,i)=='1'and 2^(6-i)or 0)end;return a[1][1]:sub(j+1,j+1)end)..({'','==','='})[#c%3+1]elseif d==false then c=string.gsub(c,'[^'..a[1][1]..'=]','')e=c:gsub('.',function(f)if f=='='then return''end;local g,k='',a[1][1]:find(f)-1;for i=6,1,-1 do g=g..(k%2^i-k%2^(i-1)>0 and'1'or'0')end;return g end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(f)if#f~=8 then return''end;local j=0;for i=1,8 do j=j+(f:sub(i,i)=='1'and 2^(8-i)or 0)end;return string.char(j)end)end;return e end;local l={}setmetatable(b,{__call=function(self,c,d)if not l[c]then l[c]={}end;if l[c][d]~=nil then error(self.RandomShit('ZXJtPyB3dGY/IGFyZSB5b3UgdHJ5aW5nIHRvIGNyYWNrIG1lPz8/',false))end;local e=self.RandomShit(c,d)l[c][d]=e;return e end})local m=a[1][3]local n='{'for o in m:gmatch('.')do n=n.."'\\"..tostring(string.byte(o)).."',"n=n.."'\\"..tostring(math.random(0,200)).."',"end;n='return '..string.sub(n,1,string.len(n)-1)..'}'local p=''table.foreach(loadstring(n)(),function(i,o)if i%2~=0 then p=p..o end end)return b(p,false)end})[1]({'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','ZXJtPyB3dGY/IGFyZSB5b3UgdHJ5aW5nIHRvIGNyYWNrIG1lPz8/','SGVsbG8gd29ybGQh'}))
+    let d = c;
+    let f = ["IllIllIllIllI","IIlllIIlllIIlllIIlllII","IIllllIIllll"];
+    let m = "--// Obfuscated Code \n\n";
 
--- SCRIPT OBFUSCADO LEO MODZ
-${content}
+    let e = "";
+    for (let n = 0; n < b.length; n++) {
+        e += "'\\" + b.charCodeAt(n) + "',";
+    }
 
--- Luarmor Pro beautifier :troll:
-print("OBFUSCADO POR LEO MODZ")`;
+    let randomName = () => f[Math.floor(Math.random()*f.length)];
 
-    return obfTemplate;
+    let o = "function IllIIIIllIIIIIl(" + randomName() + ")";
+    let p = "function " + randomName() + "(" + randomName() + ")";
+    let q = "local " + randomName() + " = (5*3-2/8+9*2/9+8*3)";
+    let r = "end";
+    let s = "IllIIIIllIIIIIl(900283)";
+
+    let t = "function IllIlllIllIlllIlllIlllIllIlllIIIlll(" + randomName() + ")";
+    let u = "local " + randomName() + " = (9*0-7/5+3*1/3+8*2)";
+    let v = "end";
+    let w = "IllIlllIllIlllIlllIlllIllIlllIIIlll(9083)";
+
+    let g = "local IlIlIlIlIlIlIlIlII = {";
+    let g_end = "}";
+
+    let x = 
+        m + d +
+        "local " + randomName() + " = 1;" +
+        o + " " + p + " " + q + " " + r + " " + r + " " + r + ";" +
+        s + ";" +
+        t + " " + u + " " + v + " " + v + ";" +
+        w + ";" +
+        g + e + g_end +
+        " loadstring(table.concat(IlIlIlIlIlIlIlIlII,''))()";
+
+    return x;
 }
 
-// =========================
-// PROCESSAR ARQUIVO
-// =========================
+// ==========================
+// Função principal usada pelo botão
+// ==========================
 function processFile() {
     const fileInput = document.getElementById("upload");
     const status = document.getElementById("status");
@@ -88,8 +118,10 @@ function processFile() {
     const reader = new FileReader();
 
     reader.onload = function(e) {
-        const originalContent = e.target.result;
-        const obfuscated = obfuscate(originalContent);
+        const original = e.target.result;
+
+        // aplica OBFUSCAÇÃO REAL
+        const obfuscated = ObfuscateLua(original);
 
         const blob = new Blob([obfuscated], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
