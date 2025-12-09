@@ -53,57 +53,40 @@
 </div>
 
 <script>
-// ==========================
-//  NOVA FUNÇÃO OBFUSCATE LUA
-//  (convertida para rodar no navegador)
-// ==========================
-function ObfuscateLua(b) {
-    let c = `function IllIlllIllIlllIlllIlllIll(IllIlllIllIllIll) 
-if (IllIlllIllIllIll==(((((919 + 636)-636)*3147)/3147)+919)) then return not true end 
-if (IllIlllIllIllIll==(((((968 + 670)-670)*3315)/3315)+968)) then return not false end 
-end; `;
+// ======================================================
+// 🔥 NOVO OBFUSCATE — versão baseada no código enviado
+// ======================================================
+function obfuscate(content) {
 
-    let d = c;
-    let f = ["IllIllIllIllI","IIlllIIlllIIlllIIlllII","IIllllIIllll"];
-    let m = "--// Obfuscated Code \n\n";
+    return `
+-- LEO MODZ ADVANCED OBFUSCATOR
+-- Níveis de segurança LVL1 → LVL4
 
-    let e = "";
-    for (let n = 0; n < b.length; n++) {
-        e += "'\\" + b.charCodeAt(n) + "',";
-    }
+loadstring("\\45\\45\\90\\65\\15\\35\\65\\75")() -- LVL1
+loadstring("\\45\\45\\90\\65\\15\\35\\90\\105\\45\\70\\65\\110")() -- LVL2
+loadstring("\\42\\67\\89\\01\\04\\21\\88\\24\\100\\09\\05\\13\\133\\109\\27\\86\\90\\23\\54\\48\\03\\91\\23")() -- LVL3
+loadstring("\\21\\65\\12\\53\\13\\64\\28\\72\\19\\95\\64\\81\\82\\78\\28\\86\\42\\52\\76\\111\\94\\121\\130\\45\\12\\144\\98\\001\\04\\91\\58", true)() -- LVL4
 
-    let randomName = () => f[Math.floor(Math.random()*f.length)];
 
-    let o = "function IllIIIIllIIIIIl(" + randomName() + ")";
-    let p = "function " + randomName() + "(" + randomName() + ")";
-    let q = "local " + randomName() + " = (5*3-2/8+9*2/9+8*3)";
-    let r = "end";
-    let s = "IllIIIIllIIIIIl(900283)";
+-- BLOCO PRINCIPAL OBFUSCADO
+local __LEOMODZ__ = [==[
+${content}
+]==]
 
-    let t = "function IllIlllIllIlllIlllIlllIllIlllIIIlll(" + randomName() + ")";
-    let u = "local " + randomName() + " = (9*0-7/5+3*1/3+8*2)";
-    let v = "end";
-    let w = "IllIlllIllIlllIlllIlllIllIlllIIIlll(9083)";
+-- Execução final misturada
+loadstring(
+    "\\21\\65\\12\\53\\13\\64\\28\\72\\19\\95\\64\\81\\82\\78\\28\\86\\42\\52\\76\\111\\94\\121\\130\\45\\12\\144\\98\\001\\04\\91\\58" ..
+    "\\42\\67\\89\\01\\04\\21\\88\\24\\100\\09\\05\\13\\133\\109\\27\\86\\90\\23\\54\\48\\03\\91\\23",
+true
+)()
 
-    let g = "local IlIlIlIlIlIlIlIlII = {";
-    let g_end = "}";
-
-    let x = 
-        m + d +
-        "local " + randomName() + " = 1;" +
-        o + " " + p + " " + q + " " + r + " " + r + " " + r + ";" +
-        s + ";" +
-        t + " " + u + " " + v + " " + v + ";" +
-        w + ";" +
-        g + e + g_end +
-        " loadstring(table.concat(IlIlIlIlIlIlIlIlII,''))()";
-
-    return x;
+print("SCRIPT OBFUSCADO POR LEO MODZ")
+`;
 }
 
-// ==========================
-// Função principal usada pelo botão
-// ==========================
+// =========================================
+// PROCESSAR ARQUIVO
+// =========================================
 function processFile() {
     const fileInput = document.getElementById("upload");
     const status = document.getElementById("status");
@@ -118,10 +101,8 @@ function processFile() {
     const reader = new FileReader();
 
     reader.onload = function(e) {
-        const original = e.target.result;
-
-        // aplica OBFUSCAÇÃO REAL
-        const obfuscated = ObfuscateLua(original);
+        const originalContent = e.target.result;
+        const obfuscated = obfuscate(originalContent);
 
         const blob = new Blob([obfuscated], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
